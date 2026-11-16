@@ -398,6 +398,7 @@
     }
     .signup .btn { padding: 12px 18px; font-size: 0.75rem; }
     .signup small { display: block; margin-top: 8px; color: var(--muted); font-size: 0.85rem; }
+    .signup-msg { margin-top: 10px; font-weight: 800; min-height: 1.6em; }
 
     .footer-col h4 { font-size: 0.75rem; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px; }
     .footer-col ul { list-style: none; display: grid; gap: 8px; font-size: 0.92rem; }
@@ -673,13 +674,14 @@
         <div class="signup">
           <label for="club-email">Be the first to know</label>
           <!-- Formspree: Cookie Club newsletter form -->
-          <form action="https://formspree.io/f/mkjrjqdq" method="POST">
+          <form action="https://formspree.io/f/mkjrjqdq" method="POST" data-ajax>
             <div class="signup-row">
               <input id="club-email" name="email" type="email" placeholder="Your email address" autocomplete="email" required>
               <input type="hidden" name="_subject" value="New Cookie Club signup">
               <button class="btn" type="submit">Sign me up</button>
             </div>
           </form>
+          <p class="signup-msg" role="status" aria-live="polite"></p>
           <small>New cookies, special offers and more.</small>
         </div>
 
@@ -711,5 +713,32 @@
       <p class="copy">&copy; 2026 Mr Chip. All rights reserved.</p>
     </div>
   </footer>
+  <script>
+    document.querySelectorAll('form[data-ajax]').forEach(function (form) {
+      var msg = form.parentElement.querySelector('.signup-msg');
+      var btn = form.querySelector('button');
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        btn.disabled = true;
+        try {
+          var res = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+          });
+          if (res.ok) {
+            form.reset();
+            msg.textContent = "You're in! Welcome to the Cookie Club.";
+          } else {
+            msg.textContent = 'Something went wrong. Please try again.';
+          }
+        } catch (err) {
+          msg.textContent = 'Something went wrong. Please try again.';
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    });
+  </script>
 </body>
 </html>
